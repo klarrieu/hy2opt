@@ -58,8 +58,8 @@ class GeoMaker(tk.Frame):
     def add(self):
         # add additional entries as a function of geosection names
         if self.sn == "gctrl":
-            self.b_calc_grid = tk.Button(self, text="Calculate from 2d_loc_MODEL_L.shp", command=lambda: self.calc_gridxy())
-            self.b_calc_grid.grid(sticky=tk.EW, row=self.par_rows["Grid Size"], column=3, padx=xd, pady=yd)
+            self.b_calc_grid = tk.Button(self, text="Calculate from 2d_code_MODEL_R.shp", command=lambda: self.calc_gridxy())
+            self.b_calc_grid.grid(sticky=tk.EW, row=self.par_rows["Grid Size (X,Y)"], column=3, padx=xd, pady=yd)
             self.b_calc_grid["state"] = "disabled"
         if self.sn == "gmat":
             tk.Button(self, text="Create Materials file", command=lambda: self.pop_mat()).grid(sticky=tk.EW,
@@ -72,15 +72,15 @@ class GeoMaker(tk.Frame):
 
     @chk_osgeo
     def calc_gridxy(self):
-        shp_file = self.par_objects["Read GIS Location"].get()
+        shp_file = self.par_objects["Read GIS Code"].get()
         if not str(shp_file).endswith(".shp"):
             showinfo("ERROR", "Define shapefile for Read GIS Location first.", parent=self)
         else:
             try:
-                self.mgeo.default_dicts["gctrl"]["Grid Size"][0] = fGl.get_shp_extent(shp_file)
-                self.par_objects["Grid Size"].delete(0, 'end')
-                self.par_objects["Grid Size"].insert(tk.END,
-                                                     str(self.mgeo.default_dicts["gctrl"]["Grid Size"][0]).strip("()"))
+                self.mgeo.default_dicts["gctrl"]["Grid Size (X,Y)"][0] = fGl.get_shp_extent(shp_file)
+                self.par_objects["Grid Size (X,Y)"].delete(0, 'end')
+                self.par_objects["Grid Size (X,Y)"].insert(tk.END,
+                                                     str(self.mgeo.default_dicts["gctrl"]["Grid Size (X,Y)"][0]).strip("()"))
             except:
                 showinfo("ERROR",
                          "Grid Size calculation failed. Verify shapefile for Read GIS Location or enter manually.",

@@ -11,6 +11,7 @@ class TuflowTab(ModuleTab):
         self.set_geometry(self.title)
 
         self.tf_dir = self.tf_dir_get()
+        self.model = None
 
         # GUI OBJECT VARIABLES
         self.gui_interpreter = tk.StringVar()
@@ -24,6 +25,9 @@ class TuflowTab(ModuleTab):
         self.c_interp.set(" -- SELECT -- ")
         self.b_create = tk.Button(self, bg="white", text="Apply selection", command=lambda: self.validate_selection())
         self.b_create.grid(sticky=tk.EW, row=0, column=2, padx=cfg.xd, pady=cfg.yd)
+        self.b_make_files = tk.Button(self, bg="white", text="Make Tuflow model files", command=lambda: self.model.export_as_tf())
+        self.b_make_files['state'] = 'disabled'
+        self.b_make_files.grid(sticky=tk.EW, row=0, column=3, padx=cfg.xd, pady=cfg.yd)
 
         tk.Label(self, text="Tuflow installation directory:").grid(sticky=tk.W, row=1, column=0, padx=cfg.xd, pady=cfg.yd)
         self.l_tf = tk.Label(self, text="%s" % self.tf_dir, width=30, justify=tk.LEFT)
@@ -67,6 +71,10 @@ class TuflowTab(ModuleTab):
     def validate_selection(self):
         if "wizard" in str(self.c_interp.get()).lower():
             self.launch_wizard()
+        else:
+            import cTFmodel as cTF
+            self.model = cTF.Hy2OptModel(str(self.c_interp.get()))
+            self.b_make_files['state'] = 'normal'
 
     def __call__(self):
         self.mainloop()

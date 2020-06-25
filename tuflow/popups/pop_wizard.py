@@ -1,4 +1,6 @@
 try:
+    import sys, os
+    sys.path.append(os.path.dirname(__file__))
     import cFrameCtrl as cFC
     import cFrameGeo as cFG
     import cFrameEvents as cFE

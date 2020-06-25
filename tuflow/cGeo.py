@@ -20,7 +20,7 @@ class ModelGeoControl:
         self.set_code = [0]
         self.shp2d_code = [""]
         self.geo_tgc_dict = {"Read GIS Location": self.shp2d_loc,
-                             "Grid Size": self.grid_sz,
+                             "Grid Size (X,Y)": self.grid_sz,
                              "Set Zpts": self.set_z,
                              "Read GRID Zpts": self.grid_z,
                              "Set Code": self.set_code,
@@ -41,7 +41,7 @@ class ModelGeoControl:
                              "Read GIS SA": self.shp2d_sa}
 
         self.geo_format_desc = {"Read GIS Location": "2d_loc_MODEL_L.shp",
-                                "Grid Size": "X, Y (m or ft)",
+                                "Grid Size (X,Y)": "X, Y (m or ft)",
                                 "Set Zpts": "Int (m or ft)",
                                 "Read GRID Zpts": "DEM raster (.asc or .flt)",
                                 "Set Code": "Int (0=False, 1=True)",

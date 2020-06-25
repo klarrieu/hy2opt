@@ -60,6 +60,7 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
                 self.par_dict[par_group].update({par: ""})
 
     def export_as_tf(self):
+        """Export internal model to Tuflow model files"""
         msg = []
         # retrieve model values
         self.get_boundary_sa_names()
@@ -71,14 +72,22 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
 
         # Write Tuflow model files
         new = fGl.copy_tree(tf_source_tree, dir2tf + "user_models/" + str(self._name) + "/")
-        msg.append(self.export_bce())
-        msg.append(self.export_bcm())
         msg.append(self.export_tgc())
         msg.append(self.export_tbc())
+        msg.append(self.export_bce())
+        msg.append(self.export_bcm())
         msg.append(self.export_mat())
 
+    def export_tcf(self):
+        tcf_file_name = os.path.join(dir2tf + "user_models/", "{0}/runs/{0}.tcf".format(self._name))
+        try:
+            with open(tcf_file_name) as tcf_file:
+                pass
+        except:
+            return "ERROR: Close file %s and re-run." % tcf_file_name
 
     def export_bce(self):
+        """Export event-specific bc file"""
         for e, e_defs in self.events.items():
             bce_file_name = dir2tf + "user_models/" + self._name + "/bc_dbase/2d_bc_" + str(e) + ".csv"
             if os.path.isfile(bce_file_name):
@@ -94,6 +103,7 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
         return "2d_bc_EVENT files created"
 
     def export_bcm(self):
+        """Export model-specific bc def"""
         mbc_file_name = dir2tf + "user_models/{0}/bc_dbase/{0}_bc_data.csv".format(self._name)
         if os.path.isfile(mbc_file_name):
             fGl.rm_file(mbc_file_name)
@@ -115,26 +125,49 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
         tbc_file_name = dir2tf + "user_models/{0}/model/{0}.tbc".format(self._name)
         if os.path.isfile(tbc_file_name):
             fGl.rm_file(tbc_file_name)
-        tbc_file = open(tbc_file_name, "w")
-        for par, val in self.par_dict["gbc"]:
-            val = self.par2tf_path(par, val)
-            tbc_file.write("{0} == {1}\n".format(par, val))
-        tbc_file.truncate()
+        with open(tbc_file_name, "w") as tbc_file:
+            for par, val in self.par_dict["gbc"].items():
+                self.export_par(tbc_file, par, val)
+            tbc_file.truncate()
         return str(self._name + ".tbc file created")
 
     def export_tgc(self):
+        """Write Tuflow .tgc file"""
         tgc_file_name = dir2tf + "user_models/{0}/model/{0}.tgc".format(self._name)
         if os.path.isfile(tgc_file_name):
             fGl.rm_file(tgc_file_name)
-        tgc_file = open(tgc_file_name, "w")
-        for par, val in self.par_dict["gctrl"]:
-            val = self.par2tf_path(par, val)
-            tgc_file.write("{0} == {1}\n".format(par, val))
-        for par, val in self.par_dict["gmat"]:
-            val = self.par2tf_path(par, val)
-            tgc_file.write("{0} == {1}\n".format(par, val))
-        tgc_file.truncate()
+        with open(tgc_file_name, "w") as tgc_file:
+            for par, val in self.par_dict["gctrl"].items():
+                self.export_par(tgc_file, par, val)
+
+            self.export_par(tgc_file, "stab", "Cell Size")
+
+            for par, val in self.par_dict["gmat"].items():
+                self.export_par(tgc_file, par, val)
+
         return str(self._name + ".tgc file created")
+
+    def export_par(self, f, par, val):
+        """
+        Parses parameter and value and appends to file f in Tuflow format  {par} == {val}
+        :param f: opened file object
+        :param par: STR, dict key
+        :param val: corresponding dict val
+        """
+        if par == "Read GIS Mat" and val == "":
+            print("Missing GIS Mat file (OK if uniform Manning\'s n applied) ...")
+            return
+        if par.startswith("Read"):
+            if val == "":
+                print("ERROR: Missing file definition for {0}.".format(par))
+                return
+            val = self.par2tf_path(par, val)
+        if type(val) == tuple:
+            val = str(val)[1:-1]
+        if val != "":
+            f.write("{0} == {1}\n".format(par, val))
+        else:
+            print("ERROR: Missing parameter: {0}.".format(par))
 
     @chk_osgeo
     def get_boundary_sa_names(self):
@@ -155,22 +188,28 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
             pass
 
     def get_model_par(self, par_group, par):
+        """get model parameter from model file"""
         try:
             for line in open(self.model_file, "r").readlines():
                 if line.strip().startswith("{0}::{1}::".format(par_group, par)):
                     par_val_str = str(line.strip().split("::")[-1])
                     if "," in par_val_str:
                         return fGl.str2tuple(par_val_str)
-                    else:
+                    if "." in par_val_str:
                         try:
                             return float(par_val_str)
                         except ValueError:
-                            return par_val_str
+                            pass
+                    try:
+                        return int(par_val_str)
+                    except ValueError:
+                        return par_val_str
             return self.default_dicts[par_group][par][0]  # else: return default value
         except:
             self.logger.error("Could not retrieve model value (par_group={0}, par={1})".format(str(par_group), str(par)))
 
     def load_model(self):
+        """load model parameters from model file"""
         for par_group, par_dict in self.par_dict.items():
             for par in par_dict.keys():
                 par_dict[par] = self.get_model_par(par_group, par)
@@ -189,7 +228,7 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
             i_val = "..\\model\\gis\\" + i_val.split("\\")[-1].split('/')[-1]
         if i_val.endswith(".asc") or i_val.endswith(".flt"):
             i_val = "..\\model\\grid\\" + i_val.split("\\")[-1].split('/')[-1]
-        file_target = dir2tf + "user_models" + i_val.strip(".")
+        file_target = dir2tf + "user_models\\%s%s" % (self._name, i_val.strip("."))
         if not os.path.isfile(file_target):
             shutil.copyfile(val, file_target)
         return i_val
