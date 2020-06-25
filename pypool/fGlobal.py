@@ -75,8 +75,8 @@ def copy_tree(source_directory, target_directory):
         structure = os.path.join(target_directory, dirpath[len(source_directory):])
         if not os.path.isdir(structure):
             os.mkdir(structure)
-        else:
-            print("Manual overwrite?")
+    if exists:
+        print("\nOverwriting: {}\n".format(target_directory))
     return exists
 
 

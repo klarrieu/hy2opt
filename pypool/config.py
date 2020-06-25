@@ -38,6 +38,7 @@ def set_directories():
         if os.path.isdir(os.path.join(mdir, sdir)) and not(('idea' in sdir) or ('__' in sdir)):
             print('Appending import folder %s ...' % sdir)
             sys.path.append(os.path.join(mdir, sdir))
+    print("\n" * 3)
 
 
 def chk_osgeo(func):

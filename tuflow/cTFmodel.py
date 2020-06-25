@@ -76,7 +76,9 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
         msg.append(self.export_tbc())
         msg.append(self.export_bce())
         msg.append(self.export_bcm())
-        msg.append(self.export_mat())
+        # msg.append(self.export_mat()
+        msg.append("\nFinished writing Tuflow model files for {0}\n".format(str(self._name)))
+        print(*msg, sep='\n')
 
     def export_tcf(self):
         tcf_file_name = os.path.join(dir2tf + "user_models/", "{0}/runs/{0}.tcf".format(self._name))
