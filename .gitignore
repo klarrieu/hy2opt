@@ -1,3 +1,7 @@
+# User files
+tuflow/models
+tuflow/user_models
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
