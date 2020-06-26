@@ -152,6 +152,7 @@ def dict_nested_read_from_file(filename, sep="::"):
     with open(filename, "r") as f:
         for line in f:
             values = line.strip("\n").split(sep)
+            values[0] = int(values[0])
             try:
                 dictionary[values[0]].update({values[1]: values[2]})
             except KeyError:

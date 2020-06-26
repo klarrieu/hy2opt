@@ -93,18 +93,10 @@ class EventMaker(tk.Frame):
             self.mbce.events.update({row: {}})
             for col in self.table.model.columnNames:
                 try:
-                    self.mbce.events[row].update({col: self.table.model.data[str(row)][col]})
+                    self.mbce.events[row].update({col: self.table.model.data[row][col]})
                 except:
                     print("Setting %s to 0.0 (no value defined)" % str(col))
                     self.mbce.events[row].update({col: 0.0})
-            try:
-                del self.mbce.events[row][0]  # delete initial non-sense entry
-            except:
-                pass
-        try:
-            del self.mbce.events[0]  # delete initial non-sense entry
-        except:
-            pass
 
         fGl.dict_nested_write2file(self.mbce.events, dir2tf + "models/" + self.mbce.event_file[0])
 
