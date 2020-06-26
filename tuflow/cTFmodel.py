@@ -85,10 +85,27 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
     def export_tcf(self):
         tcf_file_name = os.path.join(dir2tf + "user_models/", "{0}/runs/{0}.tcf".format(self._name))
         try:
-            with open(tcf_file_name) as tcf_file:
+            with open(tcf_file_name, "w") as tcf_file:
                 pass
         except:
             return "ERROR: Close file %s and re-run." % tcf_file_name
+
+    def export_tef(self):
+        tef_file_name = os.path.join(dir2tf + "user_models/", "{0}/runs/{0}.tef".format(self._name))
+        try:
+            with open(tef_file_name, "w") as tef_file:
+                """
+                for e, e_defs in self.events.items():
+                    tef_file.write("Define Event == {0}\n\t"
+                                   "BC Event Source == __event__ | {0}\n\t"
+                                   "SET IWL == {1}\n\t"
+                                   "Start Map Output == {2}\n\t"
+                                   "End Time == {3}\n"
+                                   "End Define\n".format())
+                """
+                pass
+        except:
+            return "ERROR: Close file %s and re-run." % tef_file_name
 
     def export_bce(self):
         """Export event-specific bc file"""
@@ -108,21 +125,21 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
 
     def export_bcm(self):
         """Export model-specific bc def"""
-        mbc_file_name = dir2tf + "user_models/{0}/bc_dbase/{0}_bc_data.csv".format(self._name)
-        if os.path.isfile(mbc_file_name):
-            fGl.rm_file(mbc_file_name)
-        try:
-            bcm_file = open(mbc_file_name, "w")
-        except:
-            return "ERROR: Close " + mbc_file_name + " an re-run model generator."
-        bcm_file.write("Time")
-        for e_defs in self.events.values():
-            for sa in e_defs.keys():
-                bcm_file.write("," + str(sa))
-            nl = "\n"
-            for sa_values in e_defs.values():
-                bcm_file.write(",".join([nl+str(v) for v in sa_values]))
-        bcm_file.truncate()
+        start_time = 0
+        end_time = 1000
+        for e, e_defs in self.events.items():
+            mbc_file_name = dir2tf + "user_models/{0}/bc_dbase/{0}_bc_data_{1}.csv".format(self._name, e)
+            if os.path.isfile(mbc_file_name):
+                fGl.rm_file(mbc_file_name)
+            try:
+                bcm_file = open(mbc_file_name, "w")
+            except:
+                return "ERROR: Close " + mbc_file_name + " an re-run model generator."
+            col_names = ["Time"] + self.bc_dict['sa'] + self.bc_dict['bc']
+            bcm_file.write(",".join(col_names) + "\n")
+            bcm_file.write(",".join([str(start_time)] + [e_defs[col] for col in col_names[1:]]) + "\n")
+            bcm_file.write(",".join([str(end_time)] + [e_defs[col] for col in col_names[1:]]))
+            bcm_file.truncate()
         return str(self._name + "_bc_data files created")
 
     def export_tbc(self):
