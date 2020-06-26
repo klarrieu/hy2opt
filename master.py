@@ -46,7 +46,7 @@ class MasterGUI(tk.Frame):
 
         self.tab_dirs = dict(zip(self.tab_names, self.tab_dir_names))
         self.tabs = dict(zip(self.tab_names, self.tab_list))
-        self.title = "H2Opt"
+        self.title = "Hy2Opt"
 
         # sub tabs initialized, with parents being associated top-level tabs
         self.sub_tab_list = [[tuflow.tf_gui.TuflowTab(self.tabs['Tuflow']),

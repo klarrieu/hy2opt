@@ -11,8 +11,8 @@ class ModelEvents:
         self.bce_rst_dict = {}
 
         # TEF file contents
-        self.bc_list = []  # will be read from 2d_sa_MODEL_QT_R.shp
-        self.sa_dict = {"EVENT": "Event name"}
+        self.bc_dict = {}  # will be read from 2d_sa_MODEL_QT_R.shp and 2d_bc_MODEL_HT_L.shp
+        self.sa_dict = {}
         self.event_0 = 1
         self.event_file = [""]
         self.events = {self.event_0: self.sa_dict}

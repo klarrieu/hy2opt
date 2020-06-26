@@ -68,10 +68,12 @@ class EventMaker(tk.Frame):
 
     def chk_model(self):
         if not (self.mbce.name == "default"):
-            msg0 = "Define flows of boundary source areas (define in Name-field of 2d_sa_MODEL_QT_R.shp).\n"
+            msg0 = "Define inlet flows (for Name-fields of 2d_sa_MODEL_QT_R.shp)\nand outlet WSEs (for Name-fields of 2d_bc_MODEL_HT.shp).\n"
             self.mbce.get_boundary_sa_names()
-            msg1 = str("Identified source area names: " + ", ".join(self.mbce.bc_list))
-            return msg0 + msg1, "forest green"
+            self.mbce.get_boundary_bc_names()
+            msg1 = str("Identified inlet names: " + ", ".join(self.mbce.bc_dict['sa']))
+            msg2 = str("\nIdentified outlet names: " + ", ".join(self.mbce.bc_dict['bc']))
+            return msg0 + msg1 + msg2, "forest green"
         else:
             msg0 = "NOT AVAILABLE\n\nDefine and select a model.\n"
             msg1 = "Event definitions require the prior definition of a mode with a 2d_sa_MODEL_QT_R.shp file (Geometry Tab)."
@@ -91,7 +93,7 @@ class EventMaker(tk.Frame):
             self.mbce.events.update({row: {}})
             for col in self.table.model.columnNames:
                 try:
-                    self.mbce.events[row].update({col: self.table.model.data[row][col]})
+                    self.mbce.events[row].update({col: self.table.model.data[str(row)][col]})
                 except:
                     print("Setting %s to 0.0 (no value defined)" % str(col))
                     self.mbce.events[row].update({col: 0.0})

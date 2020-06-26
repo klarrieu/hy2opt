@@ -35,6 +35,10 @@ class TuflowTab(ModuleTab):
         self.b_ch_tf_dir = tk.Button(self, bg="white", text="Change", command=lambda: self.tf_dir_set())
         self.b_ch_tf_dir.grid(sticky=tk.EW, row=1, rowspan=2, column=2, padx=cfg.xd, pady=cfg.yd)
 
+        self.b_run = tk.Button(self, bg="white", text="RUN Tuflow", command=lambda: self.run_model())
+        self.b_run['state'] = 'disabled'
+        self.b_run.grid(sticky=tk.EW, row=2, rowspan=2, column=1, padx=cfg.xd, pady=cfg.yd)
+
     def launch_wizard(self):
         try:
             import popups.pop_wizard as pcw
@@ -68,6 +72,9 @@ class TuflowTab(ModuleTab):
             model_list.append(e.split("\\")[-1].split("/")[-1].split(".hy2model")[0])
         return [" -- SELECT -- ", "MODEL SETUP WIZARD"] + model_list
 
+    def run_model(self):
+        self.model.run_model(self.tf_dir)
+
     def validate_selection(self):
         if "wizard" in str(self.c_interp.get()).lower():
             self.launch_wizard()
@@ -75,6 +82,7 @@ class TuflowTab(ModuleTab):
             import cTFmodel as cTF
             self.model = cTF.Hy2OptModel(str(self.c_interp.get()))
             self.b_make_files['state'] = 'normal'
+            self.b_run['state'] = 'normal'
 
     def __call__(self):
         self.mainloop()

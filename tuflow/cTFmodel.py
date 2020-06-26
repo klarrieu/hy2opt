@@ -64,6 +64,7 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
         msg = []
         # retrieve model values
         self.get_boundary_sa_names()
+        self.get_boundary_bc_names()
         self.load_model()
         if os.path.isfile(dir2tf + "models/" + self.event_file[0]):
             self.events = fGl.dict_nested_read_from_file(dir2tf + "models/" + self.event_file[0])
@@ -76,7 +77,8 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
         msg.append(self.export_tbc())
         msg.append(self.export_bce())
         msg.append(self.export_bcm())
-        # msg.append(self.export_mat()
+        # msg.append(self.export_tef())
+        # msg.append(self.export_mat())
         msg.append("\nFinished writing Tuflow model files for {0}\n".format(str(self._name)))
         print(*msg, sep='\n')
 
@@ -172,6 +174,24 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
             print("ERROR: Missing parameter: {0}.".format(par))
 
     @chk_osgeo
+    def get_boundary_bc_names(self):
+        dir2bc_shp = self.get_model_par("gbc", "Read GIS BC")
+        field_names = fGl.get_shp_field_names(dir2bc_shp)
+        try:
+            the_field_name = [x for x in field_names if ("name" in x.lower())][0]
+        except:
+            return "Field NAME is not defined in Read GIS SA: 2d_sa_MODEL_QT_R.shp"
+        self.bc_dict['bc'] = fGl.get_shp_field_values(dir2bc_shp, the_field_name)
+        for bc in self.bc_dict['bc']:
+            self.events[self.event_0].update({bc: 0.0})
+        self.event_file = [self.name + ".events"]
+        try:
+            # events-dict is initiated with a 0-None entry that needs to be removed
+            del self.events[self.event_0][0]
+        except:
+            pass
+
+    @chk_osgeo
     def get_boundary_sa_names(self):
         dir2sa_shp = self.get_model_par("gbc", "Read GIS SA")
         field_names = fGl.get_shp_field_names(dir2sa_shp)
@@ -179,8 +199,8 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
             the_field_name = [x for x in field_names if ("name" in x.lower())][0]
         except:
             return "Field NAME is not defined in Read GIS SA: 2d_sa_MODEL_QT_R.shp"
-        bc_list = fGl.get_shp_field_values(dir2sa_shp, the_field_name)
-        for sa in bc_list:
+        self.bc_dict['sa'] = fGl.get_shp_field_values(dir2sa_shp, the_field_name)
+        for sa in self.bc_dict['sa']:
             self.events[self.event_0].update({sa: 0.0})
         self.event_file = [self.name + ".events"]
         try:
@@ -245,6 +265,20 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
             if line.strip().startswith(search_pattern):
                 line = new_line_str
             sys.stdout.write(line)
+
+    def run_model(self, tf_dir):
+        """Run Tuflow model"""
+        commands = ["Set TF_EXE={0}".format(tf_dir)]
+
+        for e, e_defs in self.events.items():
+            print(e)
+            print(e_defs)
+            command = ""
+            commands.append(command)
+
+        for command in commands:
+            print(command)
+            os.system(command)
 
     def save_model(self):
         for par_group, par_dict in self.par_dict.items():
