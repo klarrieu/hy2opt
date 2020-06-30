@@ -77,7 +77,7 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
         msg.append(self.export_tbc())
         msg.append(self.export_bce())
         msg.append(self.export_bcm())
-        # msg.append(self.export_tef())
+        msg.append(self.export_tef())
         # msg.append(self.export_mat())
         msg.append("\nFinished writing Tuflow model files for {0}\n".format(str(self._name)))
         print(*msg, sep='\n')
@@ -94,16 +94,17 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
         tef_file_name = os.path.join(dir2tf + "user_models/", "{0}/runs/{0}.tef".format(self._name))
         try:
             with open(tef_file_name, "w") as tef_file:
-                """
                 for e, e_defs in self.events.items():
+                    # get outlet WSEs
+                    outlets = [bc for bc in self.bc_dict['bc']]
+                    outlet_wses = [e_defs[outlet] for outlet in outlets]
                     tef_file.write("Define Event == {0}\n\t"
                                    "BC Event Source == __event__ | {0}\n\t"
                                    "SET IWL == {1}\n\t"
                                    "Start Map Output == {2}\n\t"
                                    "End Time == {3}\n"
-                                   "End Define\n".format())
-                """
-                pass
+                                   "End Define\n".format(e, min(outlet_wses), 100 - 1, 100))
+                return str(self._name + ".tef created")
         except:
             return "ERROR: Close file %s and re-run." % tef_file_name
 

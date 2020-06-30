@@ -21,7 +21,7 @@ class MasterGUI(tk.Frame):
         tk.Frame.__init__(self, master)
         self.pack()
 
-        self.master.title("H2Opt")
+        self.master.title("Hy2Opt")
         self.master.iconbitmap(code_icon)
 
         self.tab_container = ttk.Notebook(master)
