@@ -30,6 +30,16 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
         self.bce_applied_dict = {}
         # self.bat_applied_dict = {}
 
+        # tuflow model file names
+        self.tgc_file_name = ''
+        self.tbc_file_name = ''
+        self.bcm_file_name = ''
+        self.tef_file_name = ''
+        self.tcf_file_name = ''
+
+        self.file_par_dict = {"Geometry Control File": self.tgc_file_name, "BC Control File": self.tbc_file_name,
+                              "BC Database": self.bcm_file_name, "Event File": self.tef_file_name}
+
         self.par_dict = {"ctrl": self.tcf_applied_dict, "stab": self.sta_applied_dict, "out": self.out_applied_dict,
                          "gctrl": self.tgc_applied_dict, "gmat": self.mat_applied_dict, "gbc": self.tbc_applied_dict,
                          "bce": self.bce_applied_dict}
@@ -37,6 +47,7 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
                               "gctrl": self.geo_tgc_dict, "gmat": self.geo_mat_dict, "gbc": self.geo_tbc_dict,
                               "bce": self.events}
         self.complete()
+        self.set_model_file_names()
 
     @property
     def model_file(self):
@@ -78,20 +89,106 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
         msg.append(self.export_bce())
         msg.append(self.export_bcm())
         msg.append(self.export_tef())
+        msg.append(self.export_tcf())
+        # msg.append(self.export_bat())
         # msg.append(self.export_mat())
         msg.append("\nFinished writing Tuflow model files for {0}\n".format(str(self._name)))
         print(*msg, sep='\n')
 
-    def export_tcf(self):
-        tcf_file_name = os.path.join(dir2tf + "user_models/", "{0}/runs/{0}.tcf".format(self._name))
+    """
+    def export_bat(self):
+        bat_file_name = os.path.join(dir2tf + "user_models/", "{0}/runs/{0}.bat".format(self._name))
+        tf_exe = os.path.join()
         try:
-            with open(tcf_file_name, "w") as tcf_file:
-                pass
+            with open(bat_file_name, "w") as bat_file:
+                bat_file.write("Set TF_exe=\"{0}\"".format())
         except:
-            return "ERROR: Close file %s and re-run." % tcf_file_name
+            return "ERROR: Close file %s and re-run." % bat_file_name
+    """
+
+    def export_tcf(self):
+        try:
+            with open(self.tcf_file_name, "w") as tcf_file:
+                for par, val in self.par_dict["ctrl"].items():
+                    self.export_par(tcf_file, par, val)
+
+                for par, val in self.file_par_dict.items():
+                    self.export_par(tcf_file, par, val)
+
+                stab_excludes = ["Cell Size", "Set IWL"]
+                if self.viscosity_f == "SMAGORINSKY":
+                    stab_excludes.append("Constant Viscosity Coefficient")
+                else:
+                    stab_excludes.append("Smagorinsky Viscosity Coefficient")
+
+                for par, val in self.par_dict["stab"].items():
+                    if par not in stab_excludes:
+                        self.export_par(tcf_file, par, val)
+
+
+
+        except:
+            return "ERROR: Close file %s and re-run." % self.tcf_file_name
+
+    def export_tgc(self):
+        """Write Tuflow .tgc file"""
+        if os.path.isfile(self.tgc_file_name):
+            fGl.rm_file(self.tgc_file_name)
+        with open(self.tgc_file_name, "w") as tgc_file:
+            for par, val in self.par_dict["gctrl"].items():
+                self.export_par(tgc_file, par, val)
+
+            self.export_par(tgc_file, "stab", "Cell Size")
+
+            for par, val in self.par_dict["gmat"].items():
+                self.export_par(tgc_file, par, val)
+
+        return str(self._name + ".tgc file created")
+
+    def export_tbc(self):
+        if os.path.isfile(self.tbc_file_name):
+            fGl.rm_file(self.tbc_file_name)
+        with open(self.tbc_file_name, "w") as tbc_file:
+            for par, val in self.par_dict["gbc"].items():
+                self.export_par(tbc_file, par, val)
+            tbc_file.truncate()
+        return str(self._name + ".tbc file created")
+
+    def export_bce(self):
+        """Export event-specific bc def"""
+        start_time = 0
+        end_time = 1000
+        for e, e_defs in self.events.items():
+            bce_file_name = dir2tf + "user_models/{0}/bc_dbase/{0}_bc_data_{1}.csv".format(self._name, e)
+            if os.path.isfile(bce_file_name):
+                fGl.rm_file(bce_file_name)
+            try:
+                bcm_file = open(bce_file_name, "w")
+            except:
+                return "ERROR: Close " + bce_file_name + " an re-run model generator."
+            col_names = ["Time"] + self.bc_dict['sa'] + self.bc_dict['bc']
+            bcm_file.write(",".join(col_names) + "\n")
+            bcm_file.write(",".join([str(start_time)] + [e_defs[col] for col in col_names[1:]]) + "\n")
+            bcm_file.write(",".join([str(end_time)] + [e_defs[col] for col in col_names[1:]]))
+            bcm_file.truncate()
+        return str(self._name + "_bc_data files created")
+
+    def export_bcm(self):
+        """Export model-specific bc file"""
+        if os.path.isfile(self.bcm_file_name):
+            fGl.rm_file(self.bcm_file_name)
+        try:
+            bce_file = open(self.bcm_file_name, "w")
+        except:
+            return "ERROR: Close " + self.bcm_file_name + " an re-run model generator."
+        for e, e_defs in self.events.items():
+            bce_file.write("Name,Source,Column 1,Column 2\n")
+            for sa in e_defs.keys():
+                bce_file.write("{0},{1}_bc_data.csv,Time,{0}\n".format(sa, self._name))
+            bce_file.truncate()
+        return "2d_bc_EVENT files created"
 
     def export_tef(self):
-        tef_file_name = os.path.join(dir2tf + "user_models/", "{0}/runs/{0}.tef".format(self._name))
         try:
             with open(tef_file_name, "w") as tef_file:
                 for e, e_defs in self.events.items():
@@ -107,67 +204,6 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
                 return str(self._name + ".tef created")
         except:
             return "ERROR: Close file %s and re-run." % tef_file_name
-
-    def export_bce(self):
-        """Export event-specific bc file"""
-        for e, e_defs in self.events.items():
-            bce_file_name = dir2tf + "user_models/" + self._name + "/bc_dbase/2d_bc_" + str(e) + ".csv"
-            if os.path.isfile(bce_file_name):
-                fGl.rm_file(bce_file_name)
-            try:
-                bce_file = open(bce_file_name, "w")
-            except:
-                return "ERROR: Close " + bce_file_name + " an re-run model generator."
-            bce_file.write("Name,Source,Column 1,Column 2\n")
-            for sa in e_defs.keys():
-                bce_file.write("{0},{1}_bc_data.csv,Time,{0}\n".format(sa, self._name))
-            bce_file.truncate()
-        return "2d_bc_EVENT files created"
-
-    def export_bcm(self):
-        """Export model-specific bc def"""
-        start_time = 0
-        end_time = 1000
-        for e, e_defs in self.events.items():
-            mbc_file_name = dir2tf + "user_models/{0}/bc_dbase/{0}_bc_data_{1}.csv".format(self._name, e)
-            if os.path.isfile(mbc_file_name):
-                fGl.rm_file(mbc_file_name)
-            try:
-                bcm_file = open(mbc_file_name, "w")
-            except:
-                return "ERROR: Close " + mbc_file_name + " an re-run model generator."
-            col_names = ["Time"] + self.bc_dict['sa'] + self.bc_dict['bc']
-            bcm_file.write(",".join(col_names) + "\n")
-            bcm_file.write(",".join([str(start_time)] + [e_defs[col] for col in col_names[1:]]) + "\n")
-            bcm_file.write(",".join([str(end_time)] + [e_defs[col] for col in col_names[1:]]))
-            bcm_file.truncate()
-        return str(self._name + "_bc_data files created")
-
-    def export_tbc(self):
-        tbc_file_name = dir2tf + "user_models/{0}/model/{0}.tbc".format(self._name)
-        if os.path.isfile(tbc_file_name):
-            fGl.rm_file(tbc_file_name)
-        with open(tbc_file_name, "w") as tbc_file:
-            for par, val in self.par_dict["gbc"].items():
-                self.export_par(tbc_file, par, val)
-            tbc_file.truncate()
-        return str(self._name + ".tbc file created")
-
-    def export_tgc(self):
-        """Write Tuflow .tgc file"""
-        tgc_file_name = dir2tf + "user_models/{0}/model/{0}.tgc".format(self._name)
-        if os.path.isfile(tgc_file_name):
-            fGl.rm_file(tgc_file_name)
-        with open(tgc_file_name, "w") as tgc_file:
-            for par, val in self.par_dict["gctrl"].items():
-                self.export_par(tgc_file, par, val)
-
-            self.export_par(tgc_file, "stab", "Cell Size")
-
-            for par, val in self.par_dict["gmat"].items():
-                self.export_par(tgc_file, par, val)
-
-        return str(self._name + ".tgc file created")
 
     def export_par(self, f, par, val):
         """
@@ -307,6 +343,15 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
     def set_model_name(self, model_name):
         self._name = model_name
         self._model_file = dir2tf + "models/" + model_name + ".hy2model"
+        self.set_model_file_names()
+
+    def set_model_file_names(self):
+        # tuflow model file names
+        self.tgc_file_name = os.path.join(dir2tf, "user_models/{0}/model/{0}.tgc".format(self._name))
+        self.tbc_file_name = os.path.join(dir2tf, "user_models/{0}/model/{0}.tbc".format(self._name))
+        self.bcm_file_name = os.path.join(dir2tf, "user_models/{0}/bc_dbase/2d_bc_{0}.csv".format(self._name))
+        self.tef_file_name = os.path.join(dir2tf, "user_models/{0}/runs/{0}.tef".format(self._name))
+        self.tcf_file_name = os.path.join(dir2tf, "user_models/{0}/runs/{0}.tcf".format(self._name))
 
     def set_usr_parameters(self, par_group, par, values):
         """
