@@ -45,6 +45,7 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
                          "bce": self.bce_applied_dict}
         self.default_dicts = {"ctrl": self.tcf_dict, "stab": self.sta_dict, "out": self.map_out_dict,
                               "gctrl": self.geo_tgc_dict, "gmat": self.geo_mat_dict, "gbc": self.geo_tbc_dict,
+                              "po": self.geo_po_dict,
                               "bce": self.events}
         self.complete()
         self.set_model_file_names()
@@ -124,11 +125,15 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
                 for par, val in self.file_par_dict.items():
                     self.export_par(tcf_file, par, val)
 
+                for par, val in self.par_dict["po"].items():
+                    par = "Read GIS PO"
+                    self.export_par(tcf_file, par, val)
+
                 stab_excludes = ["Cell Size", "Set IWL"]
                 if self.par_dict['stab']['Viscosity Formulation'] == "SMAGORINSKY":
                     stab_excludes.append("Constant Viscosity Coefficient")
                 else:
-                    stab_excludes.append("Smagorinsky Viscosity Coefficient")
+                    stab_excludes.append("Viscosity Coefficients")
 
                 for par, val in self.par_dict["stab"].items():
                     if par not in stab_excludes:

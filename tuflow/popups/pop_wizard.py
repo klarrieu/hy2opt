@@ -68,9 +68,11 @@ class Tab(tk.Frame):
         gctrl_frame = cFG.GeoMaker("gctrl", self, model_name=self.verify_model("gctrl"), relief=tk.RAISED)
         gmat_frame = cFG.GeoMaker("gmat", self, model_name=self.verify_model("gmat"), relief=tk.RAISED)
         gbc_frame = cFG.GeoMaker("gbc", self, model_name=self.verify_model("gbc"), relief=tk.RAISED)
+        po_frame = cFG.GeoMaker("po", self, model_name=self.verify_model("po"), relief=tk.RAISED)
         gctrl_frame.grid(sticky=tk.EW, row=1, column=0, columnspan=3, pady=yd)
         gmat_frame.grid(sticky=tk.EW, row=2, column=0, columnspan=3, pady=yd)
         gbc_frame.grid(sticky=tk.EW, row=3, column=0, columnspan=3, pady=yd)
+        po_frame.grid(sticky=tk.EW, row=4, column=0, columnspan=3, pady=yd)
         self.frame_dict = {"gctrl": gctrl_frame, "gmat": gmat_frame, "gbc": gbc_frame}
 
     def furnish_model_ctrl(self):

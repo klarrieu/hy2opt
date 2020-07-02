@@ -40,6 +40,12 @@ class ModelGeoControl:
         self.geo_tbc_dict = {"Read GIS BC": self.shp2d_bc,
                              "Read GIS SA": self.shp2d_sa}
 
+        # TCF file contents (PO)
+        self.po_pts = [""]
+        self.po_lns = [""]
+        self.geo_po_dict = {"Read GIS PO (pts)": self.po_pts,
+                            "Read GIS PO (lns)": self.po_lns}
+
         self.geo_format_desc = {"Read GIS Location": "2d_loc_MODEL_L.shp",
                                 "Grid Size (X,Y)": "X, Y (m or ft)",
                                 "Set Zpts": "Int (m or ft)",
@@ -50,14 +56,18 @@ class ModelGeoControl:
                                 "Read GIS Mat": "2d_mat_MODEL_R.shp",
                                 "Read Materials File": "csv file (optional)",
                                 "Read GIS BC": "2d_bc_MODEL_HT_L.shp",
-                                "Read GIS SA": "2d_sa_MODEL_QT_R.shp"}
+                                "Read GIS SA": "2d_sa_MODEL_QT_R.shp",
+                                "Read GIS PO (pts)": "2d_po_MODEL_P.shp",
+                                "Read GIS PO (lns)": "2d_po_MODEL_L.shp"}
         self.geo_name_dict = {"gctrl": "Geometry Controls",
                               "gmat": "Materials",
                               "gbc": "Geometry Boundaries",
+                              "po": "Monitoring Locations",
                               "rst": "Restart Options (Optimization)"}
         self.geo_bg_colors = {"gctrl": "light blue",
                               "gmat": "sky blue",
                               "gbc": "steel blue",
+                              "po": "light steel blue",
                               "rst": "SeaGreen1"}
 
     def __call__(self, *args, **kwargs):

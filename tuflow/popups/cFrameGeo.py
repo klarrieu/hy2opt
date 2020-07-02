@@ -11,7 +11,7 @@ class GeoMaker(tk.Frame):
     def __init__(self, section_name, master=None, model_name=None, **options):
         """
         Frames parameter section inquiries as listed in cGeo.ModelGeoControl
-        :param section_name: STR of section name - must be one of: "gctrl", "gmat", "gbc"
+        :param section_name: STR of section name - must be one of: "gctrl", "gmat", "gbc", "po"
         :param master: tk.Frame-master
         :param options: relief, ...
         """

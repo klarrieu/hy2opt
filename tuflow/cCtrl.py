@@ -25,7 +25,7 @@ class ModelControl:
         self.cell_wet_dry = [0.002]  # [m] Tuflow default
         self.dt = [1.0]
         self.iwl = ["AUTO"]
-        self.viscosity_s = [0.5]  # [-] Smagorinsky Tuflow defaults
+        self.viscosity_s = [(0.5, 0.4)]  # [-] Smagorinsky Tuflow defaults
         self.viscosity_c = [0.05]  # [[m2/s] Tuflow defaults
         self.viscosity_f = ["SMAGORINSKY", "CONSTANT"]
         self.sta_dict = {"Cell Size": self.cell_size,
@@ -33,7 +33,7 @@ class ModelControl:
                          "Set IWL": self.iwl,
                          "Timestep": self.dt,
                          "Viscosity Formulation": self.viscosity_f,
-                         "Smagorinsky Viscosity Coefficient": self.viscosity_s,
+                         "Viscosity Coefficients": self.viscosity_s,
                          "Constant Viscosity Coefficient": self.viscosity_c}
 
         # MODEL OUTPUT PARAMETERS

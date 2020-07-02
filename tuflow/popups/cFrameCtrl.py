@@ -30,18 +30,25 @@ class ControlMaker(tk.Frame):
         self.par_rows = {}  # enable identification of parameter columns to add additional buttons
         for par in self.mctrl.ctrl_par_dict[self.sn].keys():
             self.ls.append(tk.Label(self, text=par))
-            if par not in ['Map Output Format', 'Map Output Data Types', 'GRID Map Output Data Types']:  # hard-coded output format and data types for now
+            if par not in ['Map Output Format', 'Map Output Data Types', 'GRID Map Output Data Types', 'Constant Viscosity Coefficient']:  # hard-coded output format and data types for now, plus leave out constant viscosity coefficient
                 self.ls[-1].grid(sticky=tk.W, row=row, column=0, padx=xd, pady=yd)
             self.par_rows.update({par: row})
             if self.mctrl.ctrl_par_dict[self.sn][par].__len__() > 1:
-                self.par_objects.update({par: ttk.Combobox(self, width=30)})
+                if par == "Viscosity Formulation":
+                    self.par_objects.update({par: ttk.Combobox(self, width=30)})
+                    self.par_objects[par].bind('<<ComboboxSelected>>', self.format_viscosity)
+                else:
+                    self.par_objects.update({par: ttk.Combobox(self, width=30)})
                 self.par_objects[par]['state'] = 'readonly'
                 self.par_objects[par]['values'] = self.mctrl.ctrl_par_dict[self.sn][par]
                 self.par_objects[par].set(self.mctrl.ctrl_par_dict[self.sn][par][0])
             else:
                 self.par_objects.update({par: tk.Entry(self, width=30)})
-                self.par_objects[par].insert(tk.END, self.mctrl.ctrl_par_dict[self.sn][par][0])
-            if par not in ['Map Output Format', 'Map Output Data Types', 'GRID Map Output Data Types']:  # hard-coded output format and data types for now
+                if isinstance(self.mctrl.ctrl_par_dict[self.sn][par][0], tuple):
+                    self.par_objects[par].insert(tk.END, str(self.mctrl.ctrl_par_dict[self.sn][par][0]).strip("()"))
+                else:
+                    self.par_objects[par].insert(tk.END, self.mctrl.ctrl_par_dict[self.sn][par][0])
+            if par not in ['Map Output Format', 'Map Output Data Types', 'GRID Map Output Data Types', 'Constant Viscosity Coefficient']:  # hard-coded output format and data types for now, plus leave out constant viscosity coefficient
                 self.par_objects[par].grid(sticky=tk.E, row=row, column=1, padx=xd, pady=yd)
                 row += 1
 
@@ -95,6 +102,20 @@ class ControlMaker(tk.Frame):
     def format_data_type_clear(self):
         self.map_data_types = {}
         showinfo("Info", "All map output data types cleared. Add at least one.", parent=self)
+
+    def format_viscosity(self, *args):
+        visc = self.par_objects['Viscosity Formulation'].get()
+        if visc == "SMAGORINSKY":
+            self.ls[-1].grid_remove()
+            self.par_objects['Constant Viscosity Coefficient'].grid_remove()
+            self.ls[-2].grid(sticky=tk.W, padx=xd, pady=yd)
+            self.par_objects['Viscosity Coefficients'].grid(sticky=tk.E, padx=xd, pady=yd)
+        else:
+            self.ls[-2].grid_remove()
+            self.par_objects['Viscosity Coefficients'].grid_remove()
+            self.ls[-1].grid(sticky=tk.W, padx=xd, pady=yd)
+            self.par_objects['Constant Viscosity Coefficient'].grid(sticky=tk.E, row=self.grid_size()[1]-1, column=1, padx=xd, pady=yd)
+
 
     def make_up(self):
         for wid in self.winfo_children():
