@@ -30,7 +30,8 @@ class ControlMaker(tk.Frame):
         self.par_rows = {}  # enable identification of parameter columns to add additional buttons
         for par in self.mctrl.ctrl_par_dict[self.sn].keys():
             self.ls.append(tk.Label(self, text=par))
-            self.ls[-1].grid(sticky=tk.W, row=row, column=0, padx=xd, pady=yd)
+            if par not in ['Map Output Format', 'Map Output Data Types', 'GRID Map Output Data Types']:  # hard-coded output format and data types for now
+                self.ls[-1].grid(sticky=tk.W, row=row, column=0, padx=xd, pady=yd)
             self.par_rows.update({par: row})
             if self.mctrl.ctrl_par_dict[self.sn][par].__len__() > 1:
                 self.par_objects.update({par: ttk.Combobox(self, width=30)})
@@ -40,8 +41,9 @@ class ControlMaker(tk.Frame):
             else:
                 self.par_objects.update({par: tk.Entry(self, width=30)})
                 self.par_objects[par].insert(tk.END, self.mctrl.ctrl_par_dict[self.sn][par][0])
-            self.par_objects[par].grid(sticky=tk.E, row=row, column=1, padx=xd, pady=yd)
-            row += 1
+            if par not in ['Map Output Format', 'Map Output Data Types', 'GRID Map Output Data Types']:  # hard-coded output format and data types for now
+                self.par_objects[par].grid(sticky=tk.E, row=row, column=1, padx=xd, pady=yd)
+                row += 1
 
         self.add()
         self.make_up()
@@ -53,7 +55,7 @@ class ControlMaker(tk.Frame):
             self.timestep.set(self.par_objects["Timestep"].get())
             self.par_objects["Timestep"].config(textvariable=self.timestep)
             tk.Button(self, text="Estimate", command=lambda: self.pop_time()).grid(sticky=tk.W, row=self.par_rows["Timestep"], column=2, padx=xd, pady=yd)
-        if self.sn == "out":
+        if self.sn == "out" and False:  # hard-coded output format and data types for now...
             self.map_formats = ["ALL"]
             self.map_data_types = {}
             tk.Button(self, text="Add", command=lambda: self.format_add()).grid(sticky=tk.W, row=self.par_rows["Map Output Format"], column=2, padx=xd, pady=yd)
@@ -65,6 +67,10 @@ class ControlMaker(tk.Frame):
             self.cbx_selected_formats.set("ALL")
             tk.Button(self, text="Add", command=lambda: self.format_data_type_add()).grid(sticky=tk.W, row=self.par_rows["Map Output Data Types"], column=4, padx=xd, pady=yd)
             tk.Button(self, text="Reset", command=lambda: self.format_data_type_clear()).grid(sticky=tk.W, row=self.par_rows["Map Output Data Types"], column=5, padx=xd, pady=yd)
+        if self.sn == "out" and False:  # add units for time values
+            tk.Label(self, text='hr').grid(sticky=tk.W, row=self.par_rows["Start Map Output"], column=4, padx=xd, pady=yd)
+            tk.Label(self, text='s').grid(sticky=tk.W, row=self.par_rows["Map Output Interval"], column=4, padx=xd, pady=yd)
+            tk.Label(self, text='s').grid(sticky=tk.W, row=self.par_rows["Time Series Output Interval"], column=4, padx=xd, pady=yd)
 
     def format_add(self):
         if not (self.par_objects["Map Output Format"].get() in self.map_formats):

@@ -66,9 +66,12 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
         raise Exception("Read-only: Use Hy2OpModel.set_parameter_... instead.")
 
     def complete(self):
+        """
         for par_group, par_dict in self.default_dicts.items():
             for par in par_dict.keys():
                 self.par_dict[par_group].update({par: ""})
+        """
+        self.par_dict = self.default_dicts
 
     def export_as_tf(self):
         """Export internal model to Tuflow model files"""
@@ -109,7 +112,16 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
     def export_tcf(self):
         try:
             with open(self.tcf_file_name, "w") as tcf_file:
+
+                tcf_file.write("GIS Format == SHP\n")
+
                 for par, val in self.par_dict["ctrl"].items():
+                    if par == "License":
+                        if val == "demo":
+                            par = 'Demo Model'
+                            val = 'ON'
+                        else:
+                            val = ''
                     self.export_par(tcf_file, par, val)
 
                 for par, val in self.file_par_dict.items():
@@ -130,6 +142,9 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
                                "Output Folder == ..\\results\\{0}\\{0}_<<~e1~>>\\\n"
                                "Write Check Files == ..\check\\{0}\\{0}_<<~e1~>>\\\n"
                                .format(self._name))
+
+                for par, val in self.par_dict['out'].items():
+                    self.export_par(tcf_file, par, val)
 
             return str(self._name) + ".tcf file created"
         except:
@@ -220,6 +235,8 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
         if par == "Read GIS Mat" and val == "":
             print("Missing GIS Mat file (OK if uniform Manning\'s n applied) ...")
             return
+        if par == "Map Output Format" and val == "ALL":
+            val = "GRID XMDF"
         if par.startswith("Read"):
             if val == "":
                 print("ERROR: Missing file definition for {0}.".format(par))

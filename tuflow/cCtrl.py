@@ -38,11 +38,15 @@ class ModelControl:
 
         # MODEL OUTPUT PARAMETERS
         self.map_out_format = ["ASC", "DAT", "FLT", "GIS", "GRID", "NC", "T3", "TGO", "TMO", "WRB", "WRC", "WRR", "XMDF"]
+        self.map_out_format = ["GRID", "XMDF"]  # hard-coded default
         self.map_dat_xmfd_opts = ["SMS", "SMS TRIANGLES", "SMS HIGH RES",
                                   "SMS HIGH RES CORNERS ONLY"]  # if DAT > append SMS automatically - ENABLE MULTIPLE SELECTION!
+        self.start_map_out = [0]  # [hr]
         self.map_out_intv = [600]  # [s] wrong definition will result in ERROR 0045
+        self.ts_out_intv = [60]  # [s]
         self.map_out_data = ["AP", "BSS", "CI", "Cr", "CWF", "d", "dGW", "E", "F", "FLC", "h", "IR", "MB1", "MB2", "n",
                              "q", "R", "RC", "RFC", "RFML", "RFR", "SP", "SS", "t", "tau", "V", "W", "ZH"]
+        self.map_out_data = ['h', 'd', 'n', 'V', 'BSS', 'dt']  # hard-coded default
 
         """ HAZARD MAPPING PARAMETERS - CURRENTLY UNUSED
         self.map_out_haz = ["Z0", "Z1", "Z2", "Z3", "Z4", "Z5", "Z6", "Z7", "Z8", "Z9", "ZAEM1", "ZMBRC", "ZMW1",
@@ -53,7 +57,10 @@ class ModelControl:
 
         self.map_out_dict = {"Map Output Format": self.map_out_format,
                              "Map Output Data Types": self.map_out_data,
+                             "GRID Map Output Data Types": self.map_out_data,
+                             "Start Map Output": self.start_map_out,
                              "Map Output Interval": self.map_out_intv,
+                             "Time Series Output Interval": self.ts_out_intv
                              }
 
 

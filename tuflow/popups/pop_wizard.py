@@ -122,12 +122,8 @@ class Tab(tk.Frame):
                     if not (("Map" in par) and (("Format" in par) or ("Data" in par)) or ("Events" in par)):
                         self.model.set_usr_parameters(par_group, par, [str(val.get())])
                     else:
-                        if "Format" in par:
-                            self.model.set_usr_parameters(par_group, par, par_frame.map_formats)
-                        if "Data" in par:
-                            for map_k, map_v in par_frame.map_data_types.items():
-                                par_str = str(str(map_k) + " " + par).replace("All ", "")
-                                self.model.set_usr_parameters(par_group, par_str, map_v)
+                        if "Format" in par or "Data" in par:
+                            self.model.set_usr_parameters(par_group, par, par_frame.mctrl.map_out_dict[par])
                         if "Events" in par:
                             self.model.set_usr_parameters(par_group, par, val)
                             par_frame.save_event_file()
