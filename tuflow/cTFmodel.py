@@ -116,13 +116,10 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
                 tcf_file.write("GIS Format == SHP\n")
 
                 for par, val in self.par_dict["ctrl"].items():
-                    if par == "License":
-                        if val == "demo":
-                            par = 'Demo Model'
-                            val = 'ON'
-                        else:
-                            val = ''
-                    self.export_par(tcf_file, par, val)
+                    if par == "License" and val == "demo":
+                        tcf_file.write("Demo Model == ON\n")
+                    if par not in ["License", "Model Precision"]:
+                        self.export_par(tcf_file, par, val)
 
                 for par, val in self.file_par_dict.items():
                     self.export_par(tcf_file, par, val)
