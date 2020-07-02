@@ -116,7 +116,7 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
                     self.export_par(tcf_file, par, val)
 
                 stab_excludes = ["Cell Size", "Set IWL"]
-                if self.viscosity_f == "SMAGORINSKY":
+                if self.par_dict['stab']['Viscosity Formulation'] == "SMAGORINSKY":
                     stab_excludes.append("Constant Viscosity Coefficient")
                 else:
                     stab_excludes.append("Smagorinsky Viscosity Coefficient")
@@ -125,8 +125,13 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
                     if par not in stab_excludes:
                         self.export_par(tcf_file, par, val)
 
+                # hard-coded output locations
+                tcf_file.write("Log Folder == Log\\\n"
+                               "Output Folder == ..\\results\\{0}\\{0}_<<~e1~>>\\\n"
+                               "Write Check Files == ..\check\\{0}\\{0}_<<~e1~>>\\\n"
+                               .format(self._name))
 
-
+            return str(self._name) + ".tcf file created"
         except:
             return "ERROR: Close file %s and re-run." % self.tcf_file_name
 
@@ -184,13 +189,13 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
         for e, e_defs in self.events.items():
             bce_file.write("Name,Source,Column 1,Column 2\n")
             for sa in e_defs.keys():
-                bce_file.write("{0},{1}_bc_data.csv,Time,{0}\n".format(sa, self._name))
+                bce_file.write("{0},{1}_bc_data_{2}.csv,Time,{0}\n".format(sa, self._name, e))
             bce_file.truncate()
         return "2d_bc_EVENT files created"
 
     def export_tef(self):
         try:
-            with open(tef_file_name, "w") as tef_file:
+            with open(self.tef_file_name, "w") as tef_file:
                 for e, e_defs in self.events.items():
                     # get outlet WSEs
                     outlets = [bc for bc in self.bc_dict['bc']]
@@ -203,7 +208,7 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
                                    "End Define\n".format(e, min(outlet_wses), 100 - 1, 100))
                 return str(self._name + ".tef created")
         except:
-            return "ERROR: Close file %s and re-run." % tef_file_name
+            return "ERROR: Close file %s and re-run." % self.tef_file_name
 
     def export_par(self, f, par, val):
         """
@@ -352,6 +357,9 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
         self.bcm_file_name = os.path.join(dir2tf, "user_models/{0}/bc_dbase/2d_bc_{0}.csv".format(self._name))
         self.tef_file_name = os.path.join(dir2tf, "user_models/{0}/runs/{0}.tef".format(self._name))
         self.tcf_file_name = os.path.join(dir2tf, "user_models/{0}/runs/{0}.tcf".format(self._name))
+
+        self.file_par_dict = {"Geometry Control File": self.tgc_file_name, "BC Control File": self.tbc_file_name,
+                              "BC Database": self.bcm_file_name, "Event File": self.tef_file_name}
 
     def set_usr_parameters(self, par_group, par, values):
         """
