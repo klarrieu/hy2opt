@@ -239,7 +239,7 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
             return
         if par == "Map Output Format" and val == "ALL":
             val = "GRID XMDF"
-        if par.startswith("Read"):
+        if par.startswith("Read") or par.endswith(("Database", "projection", "File")):
             if val == "":
                 print("ERROR: Missing file definition for {0}.".format(par))
                 return
@@ -322,16 +322,10 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
     def par2tf_path(self, par, val):
         par = str(par)
         i_val = str(val)
-        if "Read Materials File" in par:
-            i_val = "..\\model\\" + i_val.split("\\")[-1].split('/')[-1]
-        if i_val.endswith(".shp"):
-            i_val = "..\\model\\gis\\" + i_val.split("\\")[-1].split('/')[-1]
-        if i_val.endswith(".asc") or i_val.endswith(".flt"):
-            i_val = "..\\model\\grid\\" + i_val.split("\\")[-1].split('/')[-1]
-        file_target = dir2tf + "user_models\\%s%s" % (self._name, i_val.strip("."))
-        if not os.path.isfile(file_target):
-            shutil.copyfile(val, file_target)
-        return i_val
+        root_path = os.path.join(dir2tf, "user_models\\{0}\\runs\\".format(self._name))
+        rel_path = os.path.relpath(i_val, root_path)
+        return rel_path
+
 
     def replace_model_par(self, search_pattern, new_line_str):
         """

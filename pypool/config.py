@@ -76,7 +76,7 @@ tf_source_tree = os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) 
 # GUI settings
 code_icon = dir2master + "pyorigin\\graphics\\icon.ico"
 ww = 900
-wh = 700
+wh = 720
 xd = 5
 yd = 5
 
