@@ -74,7 +74,7 @@ class GeoMaker(tk.Frame):
     def calc_gridxy(self):
         shp_file = self.par_objects["Read GIS Code"].get()
         if not str(shp_file).endswith(".shp"):
-            showinfo("ERROR", "Define shapefile for Read GIS Location first.", parent=self)
+            showinfo("ERROR", "Define shapefile for Read GIS Code first.", parent=self)
         else:
             try:
                 self.mgeo.default_dicts["gctrl"]["Grid Size (X,Y)"][0] = fGl.get_shp_extent(shp_file)

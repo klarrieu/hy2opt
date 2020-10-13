@@ -115,6 +115,7 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
             with open(self.tcf_file_name, "w") as tcf_file:
 
                 tcf_file.write("GIS Format == SHP\n")
+                self.export_par(tcf_file, "SHP projection", self.par_dict['gctrl']['SHP projection'])
 
                 for par, val in self.par_dict["ctrl"].items():
                     if par == "License" and val == "demo":
@@ -158,7 +159,8 @@ class Hy2OptModel(ModelControl, ModelGeoControl, ModelEvents):
             fGl.rm_file(self.tgc_file_name)
         with open(self.tgc_file_name, "w") as tgc_file:
             for par, val in self.par_dict["gctrl"].items():
-                self.export_par(tgc_file, par, val)
+                if par != "SHP projection":
+                    self.export_par(tgc_file, par, val)
 
             self.export_par(tgc_file, "stab", "Cell Size")
 

@@ -11,11 +11,10 @@ class ModelEvents:
         self.bce_rst_dict = {}
 
         # TEF file contents
-        self.bc_dict = {}  # will be read from 2d_sa_MODEL_QT_R.shp and 2d_bc_MODEL_HT_L.shp
-        self.sa_dict = {}
+        self.bc_dict = {'bc':'', 'sa':''}  # will be read from 2d_sa_MODEL_QT_R.shp and 2d_bc_MODEL_HT_L.shp
         self.event_0 = 1
         self.event_file = [""]
-        self.events = {self.event_0: self.sa_dict}
+        self.events = {self.event_0: {'No sa defined': 'No bc defined'}}
         # self.event_desc = {"Flow1": "Steady XXX CMS discharge"}
 
         # BAT file contents

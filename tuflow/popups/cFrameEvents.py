@@ -40,7 +40,7 @@ class EventMaker(tk.Frame):
         self.table_frame = Frame(self, width=700)
         self.table_frame.grid(sticky=tk.EW, row=2, rowspan=2, column=0, columnspan=3, padx=xd, pady=yd)
         self.table = TableCanvas(self.table_frame, data=self.mbce.events)
-        if model_name:
+        if model_name and self.mbce.events:
             self.table.show()
 
         tk.Button(self, text="Add event", command=lambda: self.add_row()).grid(sticky=tk.EW, row=2, column=3, padx=xd, pady=yd)

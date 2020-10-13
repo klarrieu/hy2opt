@@ -13,13 +13,15 @@ class ModelGeoControl:
         self.geo_rst_dict = {"Read Grid IWL": self.iwl_grid}
 
         # TGC file contents
+        self.projection = [""]
         self.shp2d_loc = [""]
         self.grid_sz = [(0, 0)]
         self.set_z = [3000]
         self.grid_z = [""]
         self.set_code = [0]
         self.shp2d_code = [""]
-        self.geo_tgc_dict = {"Read GIS Location": self.shp2d_loc,
+        self.geo_tgc_dict = {"SHP projection": self.projection,
+                             "Read GIS Location": self.shp2d_loc,
                              "Grid Size (X,Y)": self.grid_sz,
                              "Set Zpts": self.set_z,
                              "Read GRID Zpts": self.grid_z,
@@ -46,15 +48,16 @@ class ModelGeoControl:
         self.geo_po_dict = {"Read GIS PO (pts)": self.po_pts,
                             "Read GIS PO (lns)": self.po_lns}
 
-        self.geo_format_desc = {"Read GIS Location": "2d_loc_MODEL_L.shp",
+        self.geo_format_desc = {"SHP projection": ".prj file",
+                                "Read GIS Location": "2d_loc_MODEL_L.shp",
                                 "Grid Size (X,Y)": "X, Y (m or ft)",
-                                "Set Zpts": "Int (m or ft)",
+                                "Set Zpts": "above max Z (m or ft)",
                                 "Read GRID Zpts": "DEM raster (.asc or .flt)",
                                 "Set Code": "Int (0=False, 1=True)",
                                 "Read GIS Code": "2d_code_MODEL_R.shp",
                                 "Set Mat": "Int (default material ID)",
-                                "Read GIS Mat": "2d_mat_MODEL_R.shp",
-                                "Read Materials File": "csv file (optional)",
+                                "Read GIS Mat": "2d_mat_MODEL_R.shp (optional)",
+                                "Read Materials File": ".csv file",
                                 "Read GIS BC": "2d_bc_MODEL_HT_L.shp",
                                 "Read GIS SA": "2d_sa_MODEL_QT_R.shp",
                                 "Read GIS PO (pts)": "2d_po_MODEL_P.shp",
